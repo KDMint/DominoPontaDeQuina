@@ -1,6 +1,6 @@
 namespace DominoPontaDeQuina.Domain.Entities;
 
-public enum StatusJogo
+public enum StatusPartida
 {
     Aguardando,
     EmAndamento,

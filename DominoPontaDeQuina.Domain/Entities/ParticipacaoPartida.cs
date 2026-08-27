@@ -1,10 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DominoPontaDeQuina.Domain.Entities;
 
-public class ParticipacaoJogo
+public class ParticipacaoPartida
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid JogoId { get; set; }
-    public Jogo Jogo { get; set; } = null!;
+    public Guid PartidaId { get; set; }
+    public Partida Partida { get; set; } = null!;
     public Guid JogadorId { get; set; }
     public Jogador Jogador { get; set; } = null!;
     public int Posicao { get; set; }

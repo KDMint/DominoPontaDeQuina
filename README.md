@@ -12,14 +12,14 @@
 ## Modelo persistente
 
 `Usuario` representa a conta do aplicativo cliente e pode possuir varios `Jogador`, que sao perfis de jogo.
-`Jogo` representa uma partida armazenada para consulta de historico. `ParticipacaoJogo` liga um jogador a um jogo e registra sua posicao, pontuacao e resultado.
+`Partida` representa uma partida armazenada para consulta de historico. `ParticipacaoPartida` liga um jogador a uma partida e registra sua posicao, pontuacao e resultado.
 
 Esta etapa prepara a persistencia e o futuro fluxo de autenticacao. API, endpoints, autenticacao e JWT estao fora do escopo.
 
 ## Pre-requisitos
 
 - .NET 8 SDK ou .NET 10 SDK
-- Ferramenta `dotnet-ef` 8.x (`dotnet tool install --global dotnet-ef --version 8.*`)
+- Ferramenta `dotnet-ef` 9.x (`dotnet tool install --global dotnet-ef --version 9.*`)
 
 ## Restaurar e compilar
 
@@ -58,15 +58,16 @@ O banco SQLite local `domino.db` e ignorado pelo Git.
 - **Mapeamento com Data Annotations**:
   - `Usuario`: Configurado com `[Table("Usuarios")]`, `[Key]`, `[Required]`, `[MaxLength]` e `[EmailAddress]` para validação e tamanho de colunas (`Nome`, `Email`, `HashSenha`, `CriadoEm`).
   - `Jogador`: Configurado com `[Table("Jogadores")]`, `[Key]`, `[Required]`, `[MaxLength(100)]` e relacionamento com `Usuario` via `[ForeignKey(nameof(Usuario))]`.
-- **Mapeamento por Convenções**:
-  - `Jogo` e `ParticipacaoJogo`: Deixados sem anotações adicionais para resolução automática pelas convenções do EF Core (chaves primárias `Id`, tipos primitivos/enums e relacionamentos 1:N).
+- **Mapeamento com Fluent API**:
+  - `DominoDbContext` configura tabelas, chaves, limites, índice único de e-mail, conversão do status para texto e relacionamentos 1:N com exclusão em cascata.
+  - `ParticipacaoPartida` possui índice único composto por `PartidaId` e `JogadorId`.
 - **Contexto de Dados (`DominoDbContext`)**:
-  - Declaração dos `DbSet`s necessários: `Usuarios`, `Jogadores`, `Jogos` e `ParticipacoesJogo`.
+  - Declaração dos `DbSet`s necessários: `Usuarios`, `Jogadores`, `Partidas` e `ParticipacoesPartida`.
   - Configuração da conexão com SQLite (`Data Source=domino.db`) no método `OnConfiguring` com suporte a `DbContextOptions`.
 - **Design-Time Factory (`DominoDbContextFactory`)**:
   - Implementação de `IDesignTimeDbContextFactory<DominoDbContext>` no projeto `DominoPontaDeQuina.Migrations` para viabilizar comandos da CLI do EF Core.
-- **Repositório (`UsuarioRepository`)**:
-  - Implementação das operações assíncronas `AdicionarAsync` e `ObterPorEmailAsync`.
+- **Repositórios**:
+  - `UsuarioRepository`, `JogadorRepository`, `PartidaRepository` e `ParticipacaoPartidaRepository` implementam operações assíncronas de persistência e consultas LINQ.
 - **Migrações e Banco de Dados**:
-  - Criação da migration `Inicial` e execução do update no banco SQLite (`domino.db`).
+  - A migration `RenomearJogoParaPartida` renomeia as tabelas legadas, converte o status para texto e preserva os dados existentes no SQLite (`domino.db`).
 
