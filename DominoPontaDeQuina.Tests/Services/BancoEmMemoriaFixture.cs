@@ -34,6 +34,8 @@ public sealed class BancoEmMemoriaFixture : IDisposable
         servicos.AddScoped<IUsuarioService, UsuarioService>();
         servicos.AddScoped<IJogadorService, JogadorService>();
         servicos.AddScoped<IPartidaService, PartidaService>();
+        servicos.AddScoped<IAutenticacaoService, AutenticacaoService>();
+        servicos.AddSingleton<IGeradorHashSenha, GeradorHashSenhaPbkdf2>();
 
         provedor = servicos.BuildServiceProvider(new ServiceProviderOptions
         {

@@ -11,29 +11,53 @@ Content-Type: application/json
   "jogadores": ["Aninha"]
 }
 
+### Login (gera o token usado nas demais requisições)
+# @name login
+POST {{Api}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@exemplo.com",
+  "senha": "segredo1"
+}
+
+###
+@token = {{login.response.body.$.token}}
+
+### Usuário autenticado
+GET {{Api}}/api/auth/me
+Authorization: Bearer {{token}}
+
 ### Listar usuários com jogadores
 GET {{Api}}/api/usuarios
+Authorization: Bearer {{token}}
 
 ### Obter usuário por e-mail
 GET {{Api}}/api/usuarios/por-email?email=ana@exemplo.com
+Authorization: Bearer {{token}}
 
 ### Listar jogadores de um usuário
 @usuarioId = 00000000-0000-0000-0000-000000000000
 GET {{Api}}/api/usuarios/{{usuarioId}}/jogadores
+Authorization: Bearer {{token}}
 
 ### Obter jogador
 @jogadorA = 00000000-0000-0000-0000-000000000000
 @jogadorB = 00000000-0000-0000-0000-000000000000
 GET {{Api}}/api/jogadores/{{jogadorA}}
+Authorization: Bearer {{token}}
 
 ### Listar vencedores
 GET {{Api}}/api/jogadores/vencedores
+Authorization: Bearer {{token}}
 
 ### Histórico do jogador
 GET {{Api}}/api/jogadores/{{jogadorA}}/historico
+Authorization: Bearer {{token}}
 
 ### Criar partida
 POST {{Api}}/api/partidas
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -42,16 +66,20 @@ Content-Type: application/json
 
 ### Listar partidas por status (Aguardando, EmAndamento, Finalizado, Cancelado)
 GET {{Api}}/api/partidas?status=Aguardando
+Authorization: Bearer {{token}}
 
 ### Obter partida
 @partidaId = 00000000-0000-0000-0000-000000000000
 GET {{Api}}/api/partidas/{{partidaId}}
+Authorization: Bearer {{token}}
 
 ### Iniciar partida
 POST {{Api}}/api/partidas/{{partidaId}}/iniciar
+Authorization: Bearer {{token}}
 
 ### Finalizar partida
 POST {{Api}}/api/partidas/{{partidaId}}/finalizar
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -63,3 +91,4 @@ Content-Type: application/json
 
 ### Cancelar partida
 POST {{Api}}/api/partidas/{{partidaId}}/cancelar
+Authorization: Bearer {{token}}

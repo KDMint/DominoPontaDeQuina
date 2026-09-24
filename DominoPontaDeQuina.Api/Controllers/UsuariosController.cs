@@ -1,5 +1,6 @@
 using DominoPontaDeQuina.Api.Contracts;
 using DominoPontaDeQuina.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DominoPontaDeQuina.Api.Controllers;
@@ -14,6 +15,7 @@ public class UsuariosController(
 {
     /// <summary>Cadastra um usuário e seus perfis de jogador.</summary>
     [HttpPost]
+    [AllowAnonymous]
     [ProducesResponseType<UsuarioResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]

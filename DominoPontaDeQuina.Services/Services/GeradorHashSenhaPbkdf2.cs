@@ -23,12 +23,27 @@ public class GeradorHashSenhaPbkdf2 : IGeradorHashSenha
 
     public bool Verificar(string senha, string hash)
     {
+        ArgumentNullException.ThrowIfNull(senha);
+        ArgumentNullException.ThrowIfNull(hash);
+
         var partes = hash.Split('.');
-        if (partes.Length != 3 || !int.TryParse(partes[0], out var iteracoes))
+        if (partes.Length != 3 || !int.TryParse(partes[0], out var iteracoes) || iteracoes <= 0)
             return false;
 
-        var salt = Convert.FromBase64String(partes[1]);
-        var esperado = Convert.FromBase64String(partes[2]);
+        byte[] salt, esperado;
+        try
+        {
+            salt = Convert.FromBase64String(partes[1]);
+            esperado = Convert.FromBase64String(partes[2]);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+
+        if (esperado.Length == 0)
+            return false;
+
         var calculado = Rfc2898DeriveBytes.Pbkdf2(senha, salt, iteracoes, Algoritmo, esperado.Length);
 
         return CryptographicOperations.FixedTimeEquals(calculado, esperado);

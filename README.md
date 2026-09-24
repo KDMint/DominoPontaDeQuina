@@ -16,7 +16,6 @@
 `Usuario` representa a conta do aplicativo cliente e pode possuir varios `Jogador`, que sao perfis de jogo.
 `Partida` representa uma partida armazenada para consulta de historico. `ParticipacaoPartida` liga um jogador a uma partida e registra sua posicao, pontuacao e resultado.
 
-Esta etapa prepara a persistencia e o futuro fluxo de autenticacao. API, endpoints, autenticacao e JWT estao fora do escopo.
 
 ## Pre-requisitos
 
@@ -100,7 +99,9 @@ O documento OpenAPI fica em `http://localhost:5257/openapi/v1.json` (ambiente De
 
 | Método | Rota | Descrição |
 |---|---|---|
-| POST | `/api/usuarios` | Cadastra usuário (`nome`, `email`, `senha`, `jogadores`) |
+| POST | `/api/usuarios` | Cadastra usuário (`nome`, `email`, `senha`, `jogadores`) — público |
+| POST | `/api/auth/login` | Autentica (`email`, `senha`) e retorna o token JWT — público |
+| GET | `/api/auth/me` | Dados do usuário dono do token |
 | GET | `/api/usuarios` | Lista usuários com jogadores |
 | GET | `/api/usuarios/por-email?email=` | Obtém usuário pelo e-mail |
 | GET | `/api/usuarios/{usuarioId}/jogadores` | Lista jogadores do usuário |
@@ -115,3 +116,20 @@ O documento OpenAPI fica em `http://localhost:5257/openapi/v1.json` (ambiente De
 | POST | `/api/partidas/{id}/cancelar` | Cancela partida não finalizada |
 
 Erros de regra dos services são convertidos em `ProblemDetails`: `400` (dados inválidos), `404` (recurso não encontrado) e `409` (operação inválida para o status atual).
+
+## Autenticação JWT
+
+Todas as rotas exigem o header `Authorization: Bearer <token>`, exceto o cadastro (`POST /api/usuarios`) e o login (`POST /api/auth/login`). Sem token, ou com token inválido/expirado, a API responde `401`.
+
+1. Cadastre um usuário em `POST /api/usuarios` (a senha é gravada como hash PBKDF2).
+2. Faça login em `POST /api/auth/login`; a resposta traz `token`, `tipo` (`Bearer`), `expiraEm` e os dados do usuário.
+3. Envie o token nas demais requisições.
+
+- **Camadas**: `AutenticacaoService` (Services) valida e-mail e senha; `GeradorTokenJwt` (Api) emite o token assinado com HMAC-SHA256 contendo as claims `sub` (Id do usuário), `email`, `name` e `jti`.
+- **Configuração** (seção `Jwt` do `appsettings.json`): `Emissor`, `Audiencia`, `Chave` (mínimo 32 caracteres) e `ExpiracaoMinutos`. A API não inicia se a configuração for inválida.
+- **Chave**: o `appsettings.Development.json` traz uma chave apenas para desenvolvimento. Fora dele, defina a sua, sem versioná-la — por exemplo, pela variável de ambiente `Jwt__Chave` ou por `dotnet user-secrets set "Jwt:Chave" "<chave>" --project DominoPontaDeQuina.Api`.
+- **Testes** (`DominoPontaDeQuina.Tests/Api`): sobem a API em memória com `WebApplicationFactory` e cobrem acesso sem token, login válido e inválido, `/api/auth/me` e token adulterado.
+
+```bash
+dotnet test DominoPontaDeQuina.Tests --filter "Categoria=Services|Categoria=Api"
+```
