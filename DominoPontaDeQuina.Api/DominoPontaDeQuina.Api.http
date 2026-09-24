@@ -1,0 +1,65 @@
+@Api = http://localhost:5257
+
+### Cadastrar usuário
+POST {{Api}}/api/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Ana",
+  "email": "ana@exemplo.com",
+  "senha": "segredo1",
+  "jogadores": ["Aninha"]
+}
+
+### Listar usuários com jogadores
+GET {{Api}}/api/usuarios
+
+### Obter usuário por e-mail
+GET {{Api}}/api/usuarios/por-email?email=ana@exemplo.com
+
+### Listar jogadores de um usuário
+@usuarioId = 00000000-0000-0000-0000-000000000000
+GET {{Api}}/api/usuarios/{{usuarioId}}/jogadores
+
+### Obter jogador
+@jogadorA = 00000000-0000-0000-0000-000000000000
+@jogadorB = 00000000-0000-0000-0000-000000000000
+GET {{Api}}/api/jogadores/{{jogadorA}}
+
+### Listar vencedores
+GET {{Api}}/api/jogadores/vencedores
+
+### Histórico do jogador
+GET {{Api}}/api/jogadores/{{jogadorA}}/historico
+
+### Criar partida
+POST {{Api}}/api/partidas
+Content-Type: application/json
+
+{
+  "jogadorIds": ["{{jogadorA}}", "{{jogadorB}}"]
+}
+
+### Listar partidas por status (Aguardando, EmAndamento, Finalizado, Cancelado)
+GET {{Api}}/api/partidas?status=Aguardando
+
+### Obter partida
+@partidaId = 00000000-0000-0000-0000-000000000000
+GET {{Api}}/api/partidas/{{partidaId}}
+
+### Iniciar partida
+POST {{Api}}/api/partidas/{{partidaId}}/iniciar
+
+### Finalizar partida
+POST {{Api}}/api/partidas/{{partidaId}}/finalizar
+Content-Type: application/json
+
+{
+  "pontuacoes": [
+    { "jogadorId": "{{jogadorA}}", "pontuacao": 120 },
+    { "jogadorId": "{{jogadorB}}", "pontuacao": 45 }
+  ]
+}
+
+### Cancelar partida
+POST {{Api}}/api/partidas/{{partidaId}}/cancelar

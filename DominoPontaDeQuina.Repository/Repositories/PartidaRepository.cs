@@ -27,6 +27,8 @@ public class PartidaRepository(DominoDbContext contexto) : IPartidaRepository
     public Task<List<Partida>> ListarPorStatusAsync(StatusPartida status, CancellationToken cancelamento = default) =>
         contexto.Partidas
                 .Where(p => p.Status == status)
+                .Include(p => p.Participacoes)
+                    .ThenInclude(pp => pp.Jogador)
                 .OrderByDescending(p => p.IniciadoEm)
                 .ToListAsync(cancelamento);
 

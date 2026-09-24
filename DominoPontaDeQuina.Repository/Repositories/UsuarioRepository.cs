@@ -16,7 +16,9 @@ public class UsuarioRepository(DominoDbContext contexto) : IUsuarioRepository
     }
 
     public Task<Usuario?> ObterPorEmailAsync(string email, CancellationToken cancelamento = default) =>
-        contexto.Usuarios.SingleOrDefaultAsync(usuario => usuario.Email == email, cancelamento);
+        contexto.Usuarios
+                .Include(usuario => usuario.Jogadores)
+                .SingleOrDefaultAsync(usuario => usuario.Email == email, cancelamento);
 
     public Task<List<Usuario>> ListarComJogadoresAsync(CancellationToken cancelamento = default) =>
         contexto.Usuarios

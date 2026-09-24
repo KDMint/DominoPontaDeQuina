@@ -5,7 +5,8 @@
 - `DominoPontaDeQuina.Core`: regras e fluxo do jogo.
 - `DominoPontaDeQuina.Domain`: entidades e enums persistentes.
 - `DominoPontaDeQuina.Repository`: `DominoDbContext`, interfaces e implementações dos repositórios e migrações EF Core.
-- `DominoPontaDeQuina.Services`: camada de serviços que orquestra as regras de uso sobre os repositórios.
+- `DominoPontaDeQuina.Services`: camada de aplicação (services) que orquestra as regras de uso sobre os repositórios.
+- `DominoPontaDeQuina.Api`: Web API ASP.NET Core que expõe as operações dos services via HTTP.
 - `DominoPontaDeQuina.Migrations`: aplicacao console usada como startup project para migrations e execucao de demonstracao.
 - `DominoPontaDeQuina.Tests`: testes automatizados do nucleo do jogo.
 
@@ -86,3 +87,31 @@ O banco SQLite local `domino.db` e ignorado pelo Git.
 ```bash
 dotnet test DominoPontaDeQuina.Tests --filter "Categoria=Services"
 ```
+
+## Web API
+
+O projeto `DominoPontaDeQuina.Api` referencia a camada de aplicação (`DominoPontaDeQuina.Services`) e registra no `Program.cs` o `DominoDbContext` (connection string `Domino` no `appsettings.json`), os repositórios, os services e o `IGeradorHashSenha` (PBKDF2). As migrations pendentes são aplicadas ao iniciar.
+
+```bash
+dotnet run --project DominoPontaDeQuina.Api
+```
+
+O documento OpenAPI fica em `http://localhost:5257/openapi/v1.json` (ambiente Development) e o arquivo `DominoPontaDeQuina.Api/DominoPontaDeQuina.Api.http` traz exemplos de todas as requisições.
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/api/usuarios` | Cadastra usuário (`nome`, `email`, `senha`, `jogadores`) |
+| GET | `/api/usuarios` | Lista usuários com jogadores |
+| GET | `/api/usuarios/por-email?email=` | Obtém usuário pelo e-mail |
+| GET | `/api/usuarios/{usuarioId}/jogadores` | Lista jogadores do usuário |
+| GET | `/api/jogadores/{id}` | Obtém jogador com total de partidas e vitórias |
+| GET | `/api/jogadores/vencedores` | Lista jogadores com ao menos uma vitória |
+| GET | `/api/jogadores/{id}/historico` | Histórico de partidas do jogador |
+| POST | `/api/partidas` | Cria partida (`jogadorIds`, 2 a 4 jogadores) |
+| GET | `/api/partidas?status=` | Lista partidas por status |
+| GET | `/api/partidas/{id}` | Obtém partida com participações |
+| POST | `/api/partidas/{id}/iniciar` | Aguardando → EmAndamento |
+| POST | `/api/partidas/{id}/finalizar` | Registra `pontuacoes` e finaliza |
+| POST | `/api/partidas/{id}/cancelar` | Cancela partida não finalizada |
+
+Erros de regra dos services são convertidos em `ProblemDetails`: `400` (dados inválidos), `404` (recurso não encontrado) e `409` (operação inválida para o status atual).

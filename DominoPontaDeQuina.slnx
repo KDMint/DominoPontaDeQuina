@@ -2,6 +2,7 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
+  <Project Path="DominoPontaDeQuina.Api/DominoPontaDeQuina.Api.csproj" />
   <Project Path="DominoPontaDeQuina.Core/DominoPontaDeQuina.Core.csproj" />
   <Project Path="DominoPontaDeQuina.Domain/DominoPontaDeQuina.Domain.csproj" />
   <Project Path="DominoPontaDeQuina.Repository/DominoPontaDeQuina.Repository.csproj" />
