@@ -1,53 +1,40 @@
-using DominoPontaDeQuina.Domain.Entities;
+using DominoPontaDeQuina.Migrations;
 using DominoPontaDeQuina.Repository.Context;
+using DominoPontaDeQuina.Repository.Interfaces;
 using DominoPontaDeQuina.Repository.Repositories;
+using DominoPontaDeQuina.Services.Interfaces;
+using DominoPontaDeQuina.Services.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
-Console.WriteLine("=== Domino Ponta de Quina - EF Core ===");
+var servicos = new ServiceCollection();
 
-using var contexto = new DominoDbContext();
+// DbContext
+servicos.AddDbContext<DominoDbContext>(opcoes => opcoes.UseSqlite("Data Source=domino.db"));
+
+// Repositories
+servicos.AddScoped<IUsuarioRepository, UsuarioRepository>();
+servicos.AddScoped<IJogadorRepository, JogadorRepository>();
+servicos.AddScoped<IPartidaRepository, PartidaRepository>();
+servicos.AddScoped<IParticipacaoPartidaRepository, ParticipacaoPartidaRepository>();
+
+// Services
+servicos.AddScoped<IUsuarioService, UsuarioService>();
+servicos.AddScoped<IJogadorService, JogadorService>();
+servicos.AddScoped<IPartidaService, PartidaService>();
+
+// Fluxo principal
+servicos.AddScoped<AplicacaoConsole>();
+
+await using var provedor = servicos.BuildServiceProvider(new ServiceProviderOptions
+{
+    ValidateScopes = true,
+    ValidateOnBuild = true
+});
+
+await using var escopo = provedor.CreateAsyncScope();
 
 // Aplica as migrations pendentes caso o banco ainda não exista
-await contexto.Database.MigrateAsync();
+await escopo.ServiceProvider.GetRequiredService<DominoDbContext>().Database.MigrateAsync();
 
-var usuarioRepo = new UsuarioRepository(contexto);
-var email = "jogador@dominopontadequina.com";
-
-var usuarioExistente = await usuarioRepo.ObterPorEmailAsync(email);
-
-if (usuarioExistente == null)
-{
-    var novoUsuario = new Usuario
-    {
-        Nome = "Jogador Exemplo",
-        Email = email,
-        HashSenha = "hash_senha_criptografada",
-        Jogadores = new List<Jogador>
-        {
-            new Jogador { NomeExibicao = "MestreDoDomino" }
-        }
-    };
-
-    await usuarioRepo.AdicionarAsync(novoUsuario);
-    Console.WriteLine($"[+] Novo usuário '{novoUsuario.Nome}' inserido com sucesso.");
-}
-else
-{
-    Console.WriteLine($"[i] Usuário '{usuarioExistente.Nome}' já cadastrado no banco.");
-}
-
-var usuarios = await contexto.Usuarios
-    .Include(u => u.Jogadores)
-    .ToListAsync();
-
-Console.WriteLine($"\n--- Usuários Cadastrados ({usuarios.Count}) ---");
-foreach (var u in usuarios)
-{
-    var jogadores = u.Jogadores.Count > 0 
-        ? string.Join(", ", u.Jogadores.Select(j => j.NomeExibicao)) 
-        : "Nenhum";
-    Console.WriteLine($"• Nome: {u.Nome} | E-mail: {u.Email} | Jogadores: [{jogadores}]");
-}
-
-Console.WriteLine("\nExecução concluída com sucesso!");
-
+await escopo.ServiceProvider.GetRequiredService<AplicacaoConsole>().ExecutarAsync();

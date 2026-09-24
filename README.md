@@ -4,7 +4,8 @@
 
 - `DominoPontaDeQuina.Core`: regras e fluxo do jogo.
 - `DominoPontaDeQuina.Domain`: entidades e enums persistentes.
-- `DominoPontaDeQuina.Repository`: `DominoDbContext`, repositórios e migrações EF Core.
+- `DominoPontaDeQuina.Repository`: `DominoDbContext`, interfaces e implementações dos repositórios e migrações EF Core.
+- `DominoPontaDeQuina.Services`: camada de serviços que orquestra as regras de uso sobre os repositórios.
 - `DominoPontaDeQuina.Migrations`: aplicacao console usada como startup project para migrations e execucao de demonstracao.
 - `DominoPontaDeQuina.Tests`: testes automatizados do nucleo do jogo.
 
@@ -71,3 +72,17 @@ O banco SQLite local `domino.db` e ignorado pelo Git.
 - **Migrações e Banco de Dados**:
   - A migration `RenomearJogoParaPartida` renomeia as tabelas legadas, converte o status para texto e preserva os dados existentes no SQLite (`domino.db`).
 
+
+## Injeção de Dependência e Camada de Services
+
+- **Interfaces dos repositórios** (`DominoPontaDeQuina.Repository/Interfaces`): `IUsuarioRepository`, `IJogadorRepository`, `IPartidaRepository` e `IParticipacaoPartidaRepository`. As consultas LINQ continuam nas implementações dos repositórios.
+- **Services** (`DominoPontaDeQuina.Services`):
+  - `UsuarioService`: cadastro com e-mail normalizado e único, exige ao menos um jogador; `ObterOuCadastrarAsync` torna o fluxo idempotente.
+  - `JogadorService`: consultas de jogadores por usuário e de vencedores.
+  - `PartidaService`: cria partidas (2 a 4 jogadores distintos e existentes), controla as transições `Aguardando → EmAndamento → Finalizado/Cancelado`, registra pontuações e marca o(s) vencedor(es) pela maior pontuação.
+- **Composição** (`DominoPontaDeQuina.Migrations/Program.cs`): `DbContext`, repositórios, services e `AplicacaoConsole` são registrados em um `ServiceCollection` com escopo `Scoped`. O fluxo principal (`AplicacaoConsole`) recebe os services pelo construtor; nenhuma classe de aplicação é instanciada com `new`.
+- **Testes** (`DominoPontaDeQuina.Tests/Services`): montam o mesmo container de DI sobre SQLite em memória e validam o fluxo completo de usuários e partidas.
+
+```bash
+dotnet test DominoPontaDeQuina.Tests --filter "Categoria=Services"
+```

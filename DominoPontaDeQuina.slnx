@@ -6,5 +6,6 @@
   <Project Path="DominoPontaDeQuina.Domain/DominoPontaDeQuina.Domain.csproj" />
   <Project Path="DominoPontaDeQuina.Repository/DominoPontaDeQuina.Repository.csproj" />
   <Project Path="DominoPontaDeQuina.Migrations/DominoPontaDeQuina.Migrations.csproj" />
+  <Project Path="DominoPontaDeQuina.Services/DominoPontaDeQuina.Services.csproj" />
   <Project Path="DominoPontaDeQuina.Tests/DominoPontaDeQuina.Tests.csproj" />
 </Solution>

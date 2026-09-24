@@ -1,10 +1,11 @@
 using DominoPontaDeQuina.Domain.Entities;
 using DominoPontaDeQuina.Repository.Context;
+using DominoPontaDeQuina.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominoPontaDeQuina.Repository.Repositories;
 
-public class ParticipacaoPartidaRepository(DominoDbContext contexto)
+public class ParticipacaoPartidaRepository(DominoDbContext contexto) : IParticipacaoPartidaRepository
 {
     public async Task<ParticipacaoPartida> AdicionarAsync(
         ParticipacaoPartida participacao,

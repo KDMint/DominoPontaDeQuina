@@ -1,10 +1,11 @@
 using DominoPontaDeQuina.Domain.Entities;
 using DominoPontaDeQuina.Repository.Context;
+using DominoPontaDeQuina.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominoPontaDeQuina.Repository.Repositories;
 
-public class JogadorRepository(DominoDbContext contexto)
+public class JogadorRepository(DominoDbContext contexto) : IJogadorRepository
 {
     /// <summary>Adiciona um novo jogador ao banco.</summary>
     public async Task<Jogador> AdicionarAsync(Jogador jogador, CancellationToken cancelamento = default)

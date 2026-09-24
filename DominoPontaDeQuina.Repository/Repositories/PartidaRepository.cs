@@ -1,10 +1,11 @@
 using DominoPontaDeQuina.Domain.Entities;
 using DominoPontaDeQuina.Repository.Context;
+using DominoPontaDeQuina.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominoPontaDeQuina.Repository.Repositories;
 
-public class PartidaRepository(DominoDbContext contexto)
+public class PartidaRepository(DominoDbContext contexto) : IPartidaRepository
 {
     /// <summary>Adiciona uma nova partida ao banco.</summary>
     public async Task<Partida> AdicionarAsync(Partida partida, CancellationToken cancelamento = default)
